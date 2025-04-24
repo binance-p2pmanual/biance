@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Joylashuvimni aniqlash</title>
+  <meta charset="utf-8">
+  <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=YOUR_YANDEX_API_KEY" type="text/javascript"></script>
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { width: 100vw; height: 100vh; }
+
+    #btn {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      padding: 14px 28px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: background-color 0.3s ease;
+    }
+
+    #btn:hover {
+      background-color: #218838;
+    }
+
+    #btn:active {
+      transform: translateX(-50%) scale(0.98);
+    }
+  </style>
+</head>
+<body>
+  <button id="btn">Joylashuvimni aniqlash</button>
+  <div id="map"></div>
+
+  <script>
+    ymaps.ready(init);
+    let map, userMarker;
+
+    function init() {
+      // Chorrahadagi default manzil koordinatalari
+      const defaultCoords = [41.311472, 69.279716]; // Amir Temur ko‘chasi va Shahrisabz ko‘chasi chorrahasi
+
+      map = new ymaps.Map("map", {
+        center: defaultCoords,
+        zoom: 21, // Chorrahani yaqin ko‘rish uchun zoom kattaroq
+        controls: [] // Barcha boshqaruv elementlari o‘chirilgan
+      });
+
+      // Chorrahani marker bilan belgilash (svetofor joylashgan nuqta)
+      const trafficLightMarker = new ymaps.Placemark(defaultCoords, {
+        balloonContent: "Chorraha va svetofor"
+      }, {
+        preset: 'islands#redTrafficLightIcon' // Svetofor ikonkasiga o‘xshash marker
+      });
+      map.geoObjects.add(trafficLightMarker);
+
+      // "Joylashuvimni aniqlash" tugmasi funksiyasi
+      document.getElementById("btn").addEventListener("click", () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const userCoords = [lat, lon];
+
+            if (userMarker) {
+              map.geoObjects.remove(userMarker);
+            }
+
+            userMarker = new ymaps.Placemark(userCoords, {
+              balloonContent: "Siz shu yerdasiz!"
+            }, {
+              preset: 'islands#blueCircleDotIcon'
+            });
+
+            map.geoObjects.add(userMarker);
+            map.setCenter(userCoords, 16);
+          }, () => {
+            alert("Joylashuvni aniqlab bo‘lmadi.");
+          });
+        } else {
+          alert("Brauzeringiz geolokatsiyani qo‘llab-quvvatlamaydi.");
+        }
+      });
+    }
+  </script>
+</body>
+</html>
